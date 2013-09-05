@@ -1,0 +1,10 @@
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+    <soap:Body>
+        <m:GetDocPropertiesResponse xmlns:m="http://eStorefront/exchange">
+            <m:return xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                <Offer xmlns="http://eStorefront/exchange/ws">ZKI0409/001</Offer>
+                <Barcode xmlns="http://eStorefront/exchange/ws"/>
+            </m:return>
+        </m:GetDocPropertiesResponse>
+    </soap:Body>
+</soap:Envelope>

@@ -44,17 +44,18 @@ module Savon
       @option_type = :global
 
       defaults = {
-        :encoding                  => "UTF-8",
-        :soap_version              => 1,
-        :namespaces                => {},
-        :logger                    => Logger.new($stdout),
-        :log                       => true,
-        :filters                   => [],
-        :pretty_print_xml          => false,
-        :raise_errors              => true,
-        :strip_namespaces          => true,
-        :convert_response_tags_to  => lambda { |tag| tag.snakecase.to_sym},
-        :multipart                 => false,
+        :encoding                     => "UTF-8",
+        :soap_version                 => 1,
+        :namespaces                   => {},
+        :logger                       => Logger.new($stdout),
+        :log                          => true,
+        :filters                      => [],
+        :pretty_print_xml             => false,
+        :raise_errors                 => true,
+        :strip_namespaces             => true,
+        :convert_response_tags_to     => lambda { |tag| tag.snakecase.to_sym},
+        :multipart                    => false,
+        :delete_namespace_attributes  => false
       }
 
       options = defaults.merge(options)
@@ -257,6 +258,11 @@ module Savon
     def multipart(multipart)
       @options[:multipart] = multipart
     end
+
+    # Instruct Nori to delete namespace attributes.
+    def delete_namespace_attributes(delete_namespace_attributes)
+      @options[:delete_namespace_attributes] = delete_namespace_attributes
+    end
   end
 
   class LocalOptions < Options
@@ -325,6 +331,5 @@ module Savon
     def multipart(multipart)
       @options[:multipart] = multipart
     end
-
   end
 end

@@ -590,6 +590,20 @@ describe "Options" do
     end
   end
 
+  context "global :delete_namespace_attributes" do
+    it "can be changed to true to instruct Nori to delete namespace attributes" do
+      client = new_client(
+        :endpoint => @server.url(:repeat),
+        :convert_response_tags_to => lambda { |tag| tag.snakecase },
+        :delete_namespace_attributes => true
+      )
+
+      response = client.call(:authenticate, :xml => Fixture.response(:ns_attrs))
+
+      expect(response.hash["envelope"]["body"]["get_doc_properties_response"]["return"]["barcode"]).to be_nil
+    end
+  end
+
   context "global and request :soap_header" do
     it "merges the headers if both were provided as Hashes" do
       global_soap_header = {
