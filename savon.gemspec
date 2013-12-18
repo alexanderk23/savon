@@ -18,12 +18,18 @@ Gem::Specification.new do |s|
 
   s.add_dependency "nori",     "~> 2.3.0"
   s.add_dependency "httpi",    "~> 2.1.0"
-  s.add_dependency "wasabi",   "~> 3.2.0"
+  s.add_dependency "wasabi",   "~> 3.2.2"
   s.add_dependency "akami",    "~> 1.2.0"
   s.add_dependency "gyoku",    "~> 1.1.0"
 
   s.add_dependency "builder",  ">= 2.1.2"
-  s.add_dependency "nokogiri", ">= 1.4.0", "< 1.6"
+
+  if RUBY_VERSION[0,3] == "1.8"
+    # nokogiri 1.6 dropped support for ruby 1.8
+    s.add_dependency "nokogiri", ">= 1.4.0", "< 1.6"
+  else
+    s.add_dependency "nokogiri", ">= 1.4.0"
+  end
 
   s.add_development_dependency "rack"
   s.add_development_dependency "puma",  "2.0.0.b4"
