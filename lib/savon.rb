@@ -5,6 +5,8 @@ module Savon
   UnknownOptionError    = Class.new(Error)
   UnknownOperationError = Class.new(Error)
   InvalidResponseError  = Class.new(Error)
+  ValidationError       = Class.new(Error)
+
 
   def self.client(globals = {}, &block)
     Client.new(globals, &block)

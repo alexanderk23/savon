@@ -32,12 +32,32 @@ module Savon
       Nokogiri.XML(to_s).to_xml(:indent => 2)
     end
 
+    def build_document
+      tag(builder, :Envelope, namespaces_with_globals) do |xml|
+        tag(xml, :Header, header_attributes) { xml << header.to_s } unless header.empty?
+        tag(xml, :Body, body_attributes) { xml.tag!(*namespaced_message_tag) { xml << message.to_s } }
+      end
+    end
+
+    def header_attributes
+       { 'xmlns:wsa' => Akami::WSSE::WSA_NAMESPACE }
+    end
+
+    def body_attributes
+       header.wsse.signature.body_attributes if header.wsse.signature?
+    end
+
     def to_s
       return @locals[:xml] if @locals.include? :xml
-
-      tag(builder, :Envelope, namespaces_with_globals) do |xml|
-        tag(xml, :Header) { xml << header.to_s } unless header.empty?
-        tag(xml, :Body)   { xml.tag!(*namespaced_message_tag) { xml << message.to_s } }
+      if @globals[:wsse_sign_with]
+        # Can't do it right w/o rewriting everything from scratch.
+        wsse = header.wsse
+        3.times { wsse.signature.document = build_document }
+        document = build_document
+        Akami::WSSE::VerifySignature.new(document).verify!
+        document
+      else
+        build_document
       end
     end
 
@@ -97,7 +117,7 @@ module Savon
     end
 
     def header
-      @header ||= Header.new(@globals, @locals)
+      @header ||= Header.new(@operation_name, @wsdl, @globals, @locals)
     end
 
     def namespaced_message_tag

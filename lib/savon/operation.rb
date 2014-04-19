@@ -87,8 +87,10 @@ module Savon
     end
 
     def build_request(builder)
+      @locals[:soap_action] ||= soap_action
+
       request = SOAPRequest.new(@globals).build(
-        :soap_action => soap_action,
+        :soap_action => @locals[:soap_action],
         :cookies     => @locals[:cookies]
       )
 
@@ -107,11 +109,26 @@ module Savon
       return if @locals.include?(:soap_action) && !@locals[:soap_action]
 
       # get the soap_action from local options
-      soap_action = @locals[:soap_action]
+      # soap_action = @locals[:soap_action]
+      # return soap_action if soap_action
+
       # with no local option, but a wsdl, ask it for the soap_action
-      soap_action ||= @wsdl.soap_action(@name.to_sym) if @wsdl.document?
+      # soap_action ||= @wsdl.soap_action(@name.to_sym) if @wsdl.document?
       # if there is no soap_action up to this point, fallback to a simple default
-      soap_action ||= Gyoku.xml_tag(@name, :key_converter => @globals[:convert_request_keys_to])
+      # soap_action ||= Gyoku.xml_tag(@name, :key_converter => @globals[:convert_request_keys_to])
+
+      # The stuff commented out above is wrong.
+      # Wasabi assigns wrong default action name and needs to be fixed.
+      # There is no such thing as a "simple default" but strict specification one must follow.
+      # See specs at:
+      # http://www.w3.org/TR/2006/WD-ws-addr-wsdl-20060216/ - 4.2.4 Default Action Pattern for WSDL 1.1
+      # http://www.w3.org/TR/wsdl#_names - 2.4.5 Names of Elements within an Operation
+      if @wsdl.document?
+        ns = @wsdl.namespace.chomp('/')
+        port = @wsdl.parser.section('portType').first.attributes['name'].value
+        request = @wsdl.soap_action(@name.to_sym) + "Request"
+        return [ ns, port, request ].join('/')
+      end
     end
 
     def endpoint

@@ -55,7 +55,8 @@ module Savon
         :strip_namespaces             => true,
         :convert_response_tags_to     => lambda { |tag| tag.snakecase.to_sym},
         :multipart                    => false,
-        :delete_namespace_attributes  => false
+        :delete_namespace_attributes  => false,
+        :use_wsa                      => true
       }
 
       options = defaults.merge(options)
@@ -236,6 +237,11 @@ module Savon
       @options[:wsse_timestamp] = timestamp.flatten
     end
 
+    # Akami WSSE signer instance.
+    def wsse_sign_with(sign_with)
+      @options[:wsse_sign_with] = sign_with
+    end
+
     # Instruct Nori whether to strip namespaces from XML nodes.
     def strip_namespaces(strip_namespaces)
       @options[:strip_namespaces] = strip_namespaces
@@ -262,6 +268,10 @@ module Savon
     # Instruct Nori to delete namespace attributes.
     def delete_namespace_attributes(delete_namespace_attributes)
       @options[:delete_namespace_attributes] = delete_namespace_attributes
+    end
+
+    def use_wsa(enable)
+      @options[:use_wsa] = enable
     end
   end
 

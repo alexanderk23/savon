@@ -58,8 +58,8 @@ module Savon
   class SOAPRequest < HTTPRequest
 
     CONTENT_TYPE = {
-      1 => "text/xml;charset=%s",
-      2 => "application/soap+xml;charset=%s"
+      1 => "text/xml",
+      2 => "application/soap+xml"
     }
 
     def build(options = {})
@@ -81,8 +81,15 @@ module Savon
 
     def configure_headers(soap_action)
       @http_request.headers = @globals[:headers] if @globals.include? :headers
-      @http_request.headers["SOAPAction"]   ||= %{"#{soap_action}"} if soap_action
-      @http_request.headers["Content-Type"] ||= CONTENT_TYPE[@globals[:soap_version]] % @globals[:encoding]
+      content_type = []
+      version = @globals[:soap_version]
+      content_type = [ CONTENT_TYPE[version], "charset=#{@globals[:encoding]}" ]
+      if 1 == version
+        @http_request.headers["SOAPAction"] ||= %{"#{soap_action}"}
+      else
+        content_type << %{action="#{soap_action}"}
+      end
+      @http_request.headers["Content-Type"] ||= content_type.join(';')
     end
 
   end
