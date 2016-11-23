@@ -41,7 +41,7 @@ module Savon
     private
 
     def build
-      build_header + (@globals[:use_wsa] ? build_wsa_header : '') + build_wsse_header
+      build_header + build_wsse_header + (@globals[:use_wsa] ? build_wsa_header : '')
     end
 
     def build_header
@@ -64,11 +64,32 @@ module Savon
       wsse.respond_to?(:to_xml) ? wsse.to_xml : ''
     end
 
+    def message_id
+      @message_id ||= "urn:uuid:#{UUID.new.generate}"
+    end
+
+    def wsuid_hash(part)
+      { 'xmlns:wsu' => Akami::WSSE::WSU_NAMESPACE, 'wsu:Id' => @wsse.signature.part_id(part) }
+    end
+
     def build_wsa_header
-       convert_to_xml({
+       header = {
          'wsa:Action' => @locals[:soap_action],
-         'wsa:MessageID' => "uuid:#{UUID.new.generate}"
-       })
+         'wsa:MessageID' => message_id,
+         'wsa:To' => @globals[:endpoint] || @wsdl.endpoint,
+         'wsa:ReplyTo' => { 'wsa:Address' => 'http://www.w3.org/2005/08/addressing/anonymous' }
+       }
+       if @wsse.signature
+          header.merge!({
+            :attributes! => {
+              'wsa:Action' =>  wsuid_hash(:action),
+              'wsa:MessageID' =>  wsuid_hash(:message_id),
+              'wsa:To' =>  wsuid_hash(:to),
+              'wsa:ReplyTo' => wsuid_hash(:reply_to)
+            }
+          })
+       end
+       convert_to_xml(header)
     end
 
     def convert_to_xml(hash_or_string)

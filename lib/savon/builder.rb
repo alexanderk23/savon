@@ -51,8 +51,9 @@ module Savon
       return @locals[:xml] if @locals.include? :xml
       if @globals[:wsse_sign_with]
         # Can't do it right w/o rewriting everything from scratch.
-        wsse = header.wsse
-        3.times { wsse.signature.document = build_document }
+        wsse = header.wsse.signature
+        wsse.reset_ids!
+        3.times { wsse.document = build_document }
         document = build_document
         Akami::WSSE::VerifySignature.new(document).verify!
         document
